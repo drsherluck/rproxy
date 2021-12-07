@@ -1,0 +1,1 @@
+Run server.go and proxy.go on different terminals and then run main.go (or just go to http://localhost:5000 on your browser)
