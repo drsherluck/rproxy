@@ -1,6 +1,7 @@
 package main
 
 import (
+    "os"
     "log"
     "net"
     "net/http"
@@ -37,7 +38,8 @@ func logIP(r *http.Request) {
 
 func main() { 
     // Create proxy for the server 
-    proxy, err := NewProxy("http://localhost:8080")
+    
+    proxy, err := NewProxy(os.Getenv("SERVER_URL"))
     if err != nil {
         log.Fatal(err)
     }
@@ -46,7 +48,7 @@ func main() {
         Addr: ":5000", // proxy url
         Handler: proxy,
     }
-    log.Println("Listening http://localhost:5000")
+    log.Println("Listening :5000")
     log.Fatal(s.ListenAndServe())
 }
 

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-deployment
+  labels:
+    app: proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      hostname: proxy
+      containers:
+      - name: proxy
+        image: rproxy/proxy:latest
+        imagePullPolicy: Never
+        env:
+          - name: SERVER_URL
+            value: "http://server-service.default.svc.cluster.local"
+

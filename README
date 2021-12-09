@@ -1,1 +1,17 @@
-Run server.go and proxy.go on different terminals and then run main.go (or just go to http://localhost:5000 on your browser)
+Small reverse proxy server using docker and kubernetes.
+Using minikube on local machine.
+
+start minikube
+    minikube start
+
+build images
+    eval $(minikube discord-env)
+    docker build -t server server/.
+    docker build -t proxy proxy/.
+
+deploy pods and services
+    kubectl apply -k server
+    kubectl apply -k proxy
+
+start service and test 
+    minikube service proxy-service
