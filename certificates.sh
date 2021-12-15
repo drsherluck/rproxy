@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "Creating root certificate"
+
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -nodes -sha256 -days 1024 -key ca.key -subj "/CN=localhost-ca" -out ca.crt
+
+echo "Creating tls certificates"
+
+# server 
+server_dir=server
+openssl genrsa -out $server_dir/server.key 2048
+openssl req -new -key $server_dir/server.key -out $server_dir/server.csr -config csr.conf
+openssl x509 -req -in $server_dir/server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out $server_dir/server.crt -days 365 -extfile csr.conf -extensions usr_cert
+
+# proxy
+proxy_dir=proxy
+openssl genrsa -out $proxy_dir/server.key 2048
+openssl req -new -key $proxy_dir/server.key -out $proxy_dir/server.csr -config csr.conf
+openssl x509 -req -in $proxy_dir/server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out $proxy_dir/server.crt -days 365 -extfile csr.conf -extensions usr_cert
+ln -sf ../ca.crt $proxy_dir/ca.crt
+

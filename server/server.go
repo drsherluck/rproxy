@@ -1,9 +1,9 @@
 package main
 
 import (
-    "io"
     "log"
     "net/http"
+    "crypto/tls"
     "fmt"
 )
 
@@ -13,14 +13,15 @@ type handler struct {
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     h.counter++
-    io.WriteString(w, fmt.Sprintf("server handled %d requests\n", h.counter))
+    fmt.Fprintf(w, "server handled %d requests\n", h.counter)
 }
 
 func main() {
     s := &http.Server {
         Addr: ":8080",
         Handler: &handler{0},
+        TLSConfig: &tls.Config{},
     }
-    log.Println("Listening :8080")
-    log.Fatal(s.ListenAndServe())    
+    log.Println("Listening :443")
+    log.Fatal(s.ListenAndServeTLS("server.crt", "server.key"))    
 }

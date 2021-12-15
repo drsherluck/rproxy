@@ -1,17 +1,7 @@
 Small reverse proxy server using docker and kubernetes.
 Using minikube on local machine.
 
-start minikube
-    minikube start
+run certificates.sh to generate certificates
+run run.sh to create images and start k8s
 
-build images
-    eval $(minikube discord-env)
-    docker build -t server server/.
-    docker build -t proxy proxy/.
-
-deploy pods and services
-    kubectl apply -k server
-    kubectl apply -k proxy
-
-start service and test 
-    minikube service proxy-service
+use curl -sl --cacert ca.crt https://localhost:5000
