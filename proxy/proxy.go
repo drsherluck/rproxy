@@ -1,16 +1,20 @@
 package main
 
 import (
+    "bytes"
+    "fmt"
     "os"
     "io"
     "io/ioutil"
     "log"
     "net"
     "net/http"
+    "net/http/cookiejar"
     "crypto/x509"
     "crypto/tls"
     "net/url"
     "strings"
+    "time"
 )
 
 func NewProxy(target string) (*Proxy, error) {
@@ -26,12 +30,17 @@ func NewProxy(target string) (*Proxy, error) {
     transport := &http.Transport{
         TLSClientConfig: config,
     }
+    jar, err  := cookiejar.New(nil)
+    if err != nil {
+        return nil, err
+    }
 
     // create proxy server
     p := Proxy{}
     p.target = targetUrl
     p.client = &http.Client{
         Transport: transport,
+        Jar:       jar, 
     }
     return &p, nil
 }
@@ -72,6 +81,47 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, "proxy says hello\n")
 }
 
+// change to tick based approach
+func (p *Proxy) refresh(delay time.Duration) {
+    url := fmt.Sprintf("%s/login", p.target)
+    for {
+        if delay > 0 {
+            time.Sleep(delay)
+        }
+
+        // refresh session 
+        _, err := p.client.Get(url)
+        if err != nil {
+            log.Println(err)
+        }
+    }
+}
+
+func (p *Proxy) login() {
+    // send password to server for authentication
+    url := fmt.Sprintf("%s/login", p.target)
+    data := bytes.NewBuffer([]byte(os.Getenv("SERVER_PASS")))
+    r, err := p.client.Post(url, "text/html", data)
+    if err != nil {
+        log.Println(err)
+    }
+    log.Println(r.Cookies())
+
+    // todo handle bad request
+    if r.StatusCode == http.StatusBadRequest {
+        return
+    }
+  
+    // refresh session automatically
+    cookies := r.Cookies()
+    if len(cookies) < 1 || cookies[0].Name != "session_token" {
+        log.Println("No session cookie found")
+        return
+    }
+    delay := cookies[0].Expires.Sub(time.Now().Add(2 * time.Second))
+    go p.refresh(delay)
+}
+
 func logIP(r *http.Request) {
     ip, _, err := net.SplitHostPort(r.RemoteAddr)
     if err == nil {
@@ -89,7 +139,7 @@ func loadCA(caFile string) *x509.CertPool {
     return pool
 }
 
-func main() { 
+func main() {
     proxy, err := NewProxy(os.Getenv("SERVER_URL"))
     if err != nil {
         log.Fatal(err)
@@ -101,6 +151,9 @@ func main() {
         TLSConfig: &tls.Config{},
     }
     log.Println("Listening :443")
+
+    // authenticate
+    proxy.login()
     log.Fatal(s.ListenAndServeTLS("server.crt", "server.key"))
 }
 
