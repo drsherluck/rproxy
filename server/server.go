@@ -8,7 +8,6 @@ import (
     "io"
     "io/ioutil"
     "time"
-    "strings"
     "github.com/google/uuid"
     c "github.com/patrickmn/go-cache"
 )
@@ -114,9 +113,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-
-    // remmove new line added by ReadFile
-    password = strings.TrimRight(string(content), "\n")
+    password = string(content)
 
     // setup cache
     cache = c.New(c.NoExpiration, time.Hour)
