@@ -23,7 +23,10 @@ spec:
         - name: SERVER_URL
           value: "https://server-service.default.svc.cluster.local"
         - name: SERVER_PASS
-          value: ${SERVER_PASS}
+          valueFrom:
+            secretKeyRef:
+              name: proxy-pass
+              key: password
         volumeMounts:
         - name: tls-volume
           mountPath: "/etc/tls"

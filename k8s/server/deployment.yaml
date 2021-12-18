@@ -25,7 +25,10 @@ spec:
           readOnly: true
         env:
         - name: SERVER_PASS
-          value: ${SERVER_PASS}
+          valueFrom:
+            secretKeyRef:
+              name: server-pass
+              key: password
       volumes:
       - name: tls-volume
         secret:
