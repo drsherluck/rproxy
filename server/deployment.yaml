@@ -17,5 +17,17 @@ spec:
       hostname: server
       containers:
       - name: server
-        image: rproxy/server:latest
+        image: server:latest
         imagePullPolicy: Never
+        volumeMounts:
+        - name: tls-volume
+          mountPath: "/etc/tls"
+          readOnly: true
+        env:
+        - name: SERVER_PASS
+          value: ${SERVER_PASS}
+      volumes:
+      - name: tls-volume
+        secret:
+          secretName: tls-secret-server
+

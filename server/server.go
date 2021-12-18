@@ -1,12 +1,12 @@
 package main
 
 import (
+    "os"
     "log"
     "net/http"
     "crypto/tls"
     "fmt"
     "io"
-    "io/ioutil"
     "time"
     "github.com/google/uuid"
     c "github.com/patrickmn/go-cache"
@@ -109,11 +109,7 @@ func createSession(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     // load password
-    content, err := ioutil.ReadFile("password")
-    if err != nil {
-        log.Fatal(err)
-    }
-    password = string(content)
+    password = os.Getenv("SERVER_PASS")
 
     // setup cache
     cache = c.New(c.NoExpiration, time.Hour)
@@ -124,10 +120,10 @@ func main() {
     mux.HandleFunc("/login", authenticate)
 
     s := &http.Server {
-        Addr: ":8080",
+        Addr: ":443",
         Handler: mux,
         TLSConfig: &tls.Config{},
     }
     log.Println("Listening :443")
-    log.Fatal(s.ListenAndServeTLS("server.crt", "server.key"))    
+    log.Fatal(s.ListenAndServeTLS("/etc/tls/tls.crt", "/etc/tls/tls.key"))    
 }

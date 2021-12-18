@@ -20,24 +20,22 @@ spec:
         image: proxy:latest
         imagePullPolicy: Never
         env:
-        - name: SERVER_URL
-          value: "https://server-service.default.svc.cluster.local"
-        - name: SERVER_PASS
-          value: ${SERVER_PASS}
+          - name: SERVER_URL
+            value: "https://server-service.default.svc.cluster.local"
+          - name: SERVER_PASS
+            value: "Avocado"
         volumeMounts:
         - name: tls-volume
           mountPath: "/etc/tls"
           readOnly: true
-      # wait for the server to be avialable before 
-      # starting the proxy server
-      initContainers:
-      - name: wait-for-server
-        image: busybox:latest
-        command:
-          - "sh"
-          - "-c"
-          - "until nslookup server-service.default.svc.cluster.local; \
-             do echo waiting for server serivce; sleep 2; done"
+        startupProbe:
+          failureThreshold: 5
+          periodSeconds: 5
+          initialDelaySeconds: 1
+          tcpSocket:
+            host: "https://server-service.default.svc.cluster.local"
+            port: 443
+
       volumes:
       - name: tls-volume
         secret:

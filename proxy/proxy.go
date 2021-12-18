@@ -5,12 +5,10 @@ import (
     "fmt"
     "os"
     "io"
-    "io/ioutil"
     "log"
     "net"
     "net/http"
     "net/http/cookiejar"
-    "crypto/x509"
     "crypto/tls"
     "net/url"
     "strings"
@@ -25,7 +23,7 @@ func NewProxy(target string) (*Proxy, error) {
    
     // http over tls 
     config    := &tls.Config{
-        RootCAs: loadCA("ca.crt"),
+        InsecureSkipVerify: true,
     }
     transport := &http.Transport{
         TLSClientConfig: config,
@@ -129,16 +127,6 @@ func logIP(r *http.Request) {
     }
 }
 
-func loadCA(caFile string) *x509.CertPool {
-    pool := x509.NewCertPool()
-    ca, err := ioutil.ReadFile(caFile)
-    if  err != nil {
-        log.Fatal(err)
-    }
-    pool.AppendCertsFromPEM(ca)
-    return pool
-}
-
 func main() {
     proxy, err := NewProxy(os.Getenv("SERVER_URL"))
     if err != nil {
@@ -146,7 +134,7 @@ func main() {
     }
 
     s := &http.Server{
-        Addr: ":5000",
+        Addr: ":443",
         Handler: proxy,
         TLSConfig: &tls.Config{},
     }
@@ -154,6 +142,6 @@ func main() {
 
     // authenticate
     proxy.login()
-    log.Fatal(s.ListenAndServeTLS("server.crt", "server.key"))
+    log.Fatal(s.ListenAndServeTLS("/etc/tls/tls.crt", "/etc/tls/tls.key"))
 }
 
