@@ -19,18 +19,10 @@ spec:
       - name: server
         image: server:latest
         imagePullPolicy: Never
-        volumeMounts:
-        - name: tls-volume
-          mountPath: "/etc/tls"
-          readOnly: true
         env:
         - name: SERVER_PASS
           valueFrom:
             secretKeyRef:
               name: server-pass
               key: password
-      volumes:
-      - name: tls-volume
-        secret:
-          secretName: tls-secret-server
 

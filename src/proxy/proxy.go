@@ -20,14 +20,6 @@ func NewProxy(target string) (*Proxy, error) {
     if err != nil {
         return nil, err
     }
-   
-    // http over tls 
-    config    := &tls.Config{
-        InsecureSkipVerify: true,
-    }
-    transport := &http.Transport{
-        TLSClientConfig: config,
-    }
     jar, err  := cookiejar.New(nil)
     if err != nil {
         return nil, err
@@ -37,7 +29,6 @@ func NewProxy(target string) (*Proxy, error) {
     p := Proxy{}
     p.target = targetUrl
     p.client = &http.Client{
-        Transport: transport,
         Jar:       jar, 
     }
     return &p, nil

@@ -4,7 +4,6 @@ import (
     "os"
     "log"
     "net/http"
-    "crypto/tls"
     "fmt"
     "io"
     "time"
@@ -102,15 +101,14 @@ func createSession(w http.ResponseWriter, r *http.Request) {
         Name: sKey,
         Value: session,
         Expires: time.Now().Add(sessionExpireTime),
-        Secure: true,
-        HttpOnly: true,
+        //Secure: true,
+        //HttpOnly: true,
     })
 }
 
 func main() {
     // load password
     password = os.Getenv("SERVER_PASS")
-
     // setup cache
     cache = c.New(c.NoExpiration, time.Hour)
 
@@ -120,10 +118,9 @@ func main() {
     mux.HandleFunc("/login", authenticate)
 
     s := &http.Server {
-        Addr: ":443",
+        Addr: ":80",
         Handler: mux,
-        TLSConfig: &tls.Config{},
     }
-    log.Println("Listening :443")
-    log.Fatal(s.ListenAndServeTLS("/etc/tls/tls.crt", "/etc/tls/tls.key"))    
+    log.Println("Listening :80")
+    log.Fatal(s.ListenAndServe());
 }

@@ -6,6 +6,6 @@ spec:
   selector:
     app: server
   ports:
-    - name: https
+    - name: http
       protocol: TCP
-      port: 443
+      port: 80

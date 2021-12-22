@@ -15,10 +15,8 @@ docker build -t server src/server/.
 docker build -t proxy src/proxy/.
 
 # add tls secrets
-sdir=k8s/server
 pdir=k8s/proxy
-kubectl delete secret tls-secret-server tls-secret-proxy
-kubectl create secret tls tls-secret-server --cert=$sdir/server.crt --key=$sdir/server.key
+kubectl delete secret tls-secret-proxy
 kubectl create secret tls tls-secret-proxy  --cert=$pdir/server.crt --key=$pdir/server.key
 
 # create pods and serivces
