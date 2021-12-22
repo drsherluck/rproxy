@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-deployment
+  labels:
+    app: proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      hostname: proxy
+      containers:
+      - name: proxy
+        image: proxy:latest
+        imagePullPolicy: Never
+        env:
+        - name: SERVER_URL
+          value: "http://server-service.default.svc.cluster.local"
+        - name: SERVER_PASS
+          valueFrom:
+            secretKeyRef:
+              name: proxy-pass
+              key: password
+        volumeMounts:
+        - name: tls-volume
+          mountPath: "/etc/tls"
+          readOnly: true
+      # wait for the server to be avialable before 
+      # starting the proxy server
+      initContainers:
+      - name: wait-for-server
+        image: busybox:latest
+        command:
+          - "sh"
+          - "-c"
+          - "until nslookup server-service.default.svc.cluster.local; \
+             do echo waiting for server service; sleep 2; done"
+      volumes:
+      - name: tls-volume
+        secret:
+          secretName: tls-secret-proxy
+

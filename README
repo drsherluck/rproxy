@@ -1,1 +1,8 @@
-Run server.go and proxy.go on different terminals and then run main.go (or just go to http://localhost:5000 on your browser)
+Small reverse proxy server using docker and kubernetes.
+Using minikube on local machine.
+
+1. export SERVER_PASS="password"
+2. create certificates: ./certificates.sh
+3. build images and run k8s: ./run.sh
+4. get proxy-service port: kubectl get svc
+5. test with: curl -sl -k -v https://$(minikube ip):port

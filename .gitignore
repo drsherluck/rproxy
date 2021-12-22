@@ -1,0 +1,8 @@
+# ignore certificates and keys
+*.key
+*.crt
+*.pem
+*.csr
+*.srl
+server/password
+
